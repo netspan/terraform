@@ -1,0 +1,6 @@
+---
+- name: Updating apt cache
+  apt:
+    update_cache: yes
+  listen:
+   - update apt cache

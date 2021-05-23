@@ -1,0 +1,35 @@
+---
+- name: Adding Hashicorp’s official GPG key
+  apt_key:
+    id: E8A032E094D8EB4EA189D270DA418C88A3219F7B
+    url: https://apt.releases.hashicorp.com/gpg
+    state: present
+  notify:
+    - Updating apt cache
+
+- name: Fetching dpkg architecture
+  # this is not easily available as a fact
+  command: dpkg --print-architecture
+  register: result
+  changed_when: false
+
+- name: Adding Hashicorp repository
+  vars:
+    arch: "{{result.stdout}}"
+  apt_repository:
+    repo: "deb [arch={{arch}}] https://apt.releases.hashicorp.com {{ansible_distribution_release}} main"
+    filename: hashicorp
+    state: present
+  notify:
+    - update apt cache
+
+- name: Flushing handlers
+  meta: flush_handlers
+
+- name: Installing Terraform
+  apt:
+    update_cache: true
+    cache_valid_time: "3600"
+    state: present
+    name:
+      - terraform
